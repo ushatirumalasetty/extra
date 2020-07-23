@@ -1,0 +1,556 @@
+{
+    "swagger": "2.0",
+    "host": "localhost:8000",
+    "basePath": "/fb_post/",
+    "info": {
+        "version": "1.0.0",
+        "title": "fb_post API",
+        "description": "A fb_post API to do different applications realated to pots"
+    },
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "oauth": {
+            "tokenUrl": "http://auth.ibtspl.com/oauth2/",
+            "flow": "password",
+            "scopes": {
+                "read": "read users",
+                "write": "create users",
+                "update": "update users",
+                "delete": "delete users",
+                "superuser": "super user permission"
+            },
+            "type": "oauth2"
+        }
+    },
+    "definitions": {
+        "Post": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "content"
+            ]
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "profile_pic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "user_id"
+            ]
+        },
+        "Reactions": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "reaction_type": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "reaction_type": {
+                                "type": "string",
+                                "enum": [
+                                    "WOW",
+                                    "LIT",
+                                    "LOVE",
+                                    "HAHA",
+                                    "THUMBS-UP",
+                                    "THUMBS-DOWN",
+                                    "ANGRY",
+                                    "SAD"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+
+            "required": [
+                "count",
+                "reaction_type"
+                ]
+        },
+
+
+    },
+
+    "PostCompleteInformation": {
+        "PostDetails": {
+            "type": "object",
+            "properties": {
+                "createdOn": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "createdOn",
+                "userId"
+            ]
+        }
+    },
+    "parameters": {
+        "CreateNewPostParameter": {
+            "name": "post",
+            "in": "body",
+            "description": "The post to create.",
+            "schema": {
+                "$ref": "#/definitions/Post"
+            }
+        }
+    },
+    "responses": {
+        "CreateNewPersonResponse": {
+            "description": "Success Response",
+            "schema": {
+                "$ref": "#/definitions/UserWithExtraFields"
+            }
+        },
+        "GetPost": {
+            "description": "Success Response",
+            "schema": {
+                "$ref": "#/definitions/Reactions"
+            }
+        }
+    },
+    "paths": {
+        "/post/create/": {
+            "post": {
+                "operationId": "create_post",
+                "summary": "Create New Post",
+                "description": "Creates a new post and return the post_id object. This api is not idempotent.",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/CreateNewPostParameter"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "sucess response",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/comment/{post_id}/create/": {
+            "post": {
+                "operationId": "create_comment",
+                "summary": "Create New Comment",
+                "description": "Creates a new comment and return the comment_id object. This api is not idempotent.",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "comment",
+                        "in": "body",
+                        "description": "The comment to create",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                            "content"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "post_id",
+                        "in": "path",
+                        "description": "the comment for the post_id of post to be created",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "sucess response",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/post/{post_id}/delete/": {
+            "delete": {
+                "operationId": "delete_post",
+                "summary": "delete post of given post_id",
+                "description": "delete post of given post_id. This api is not idempotent.",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "post_id",
+                        "in": "path",
+                        "description": "The post_id of post to delete",
+                        "required": true,
+                        "type": "integer"
+                        }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "sucess response"
+                    }
+                }
+            }
+        },
+        "/post/{post_id}/react/": {
+            "post": {
+                "operationId": "react_to_post",
+                "summary": "react to post of given post_id",
+                "description": "react to post of given post_id. This api is not idempotent.",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "post_id",
+                        "in": "path",
+                        "description": "The post_id of post to react",
+                        "required": true,
+                        "type": "integer"
+                        },
+                    {
+                        "name": "reaction",
+                        "in": "body",
+                        "description": "The reaction_type to react for an post",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reaction_type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "WOW",
+                                        "LIT",
+                                        "LOVE",
+                                        "HAHA",
+                                        "THUMBS-UP",
+                                        "THUMBS-DOWN",
+                                        "ANGRY",
+                                        "SAD"
+                                        ]
+                                }
+                            },
+                            "required": [
+                            "reaction_type"
+                            ]
+                        }
+                    },
+                ],
+                "responses": {
+                    "201": {
+                        "description": "sucess response"
+                    }
+                }
+            }
+        },
+        "/comment/{comment_id}/react/": {
+            "post": {
+                "operationId": "react_to_comment",
+                "summary": "react to comment of given comment_id",
+                "description": "react to post of given post_id. This api is not idempotent.",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "comment_id",
+                        "in": "path",
+                        "description": "The comment_id of comment to react",
+                        "required": true,
+                        "type": "integer"
+                        },
+                    {
+                        "name": "reaction",
+                        "in": "body",
+                        "description": "The reaction_type to react for a comment",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reaction_type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "WOW",
+                                        "LIT",
+                                        "LOVE",
+                                        "HAHA",
+                                        "THUMBS-UP",
+                                        "THUMBS-DOWN",
+                                        "ANGRY",
+                                        "SAD"
+                                        ]
+                                }
+                            },
+                            "required": [
+                            "reaction_type"
+                            ]
+                        }
+                    },
+                ],
+                "responses": {
+                    "201": {
+                        "description": "sucess response"
+                    }
+                }
+            }
+        },
+        "/comment/{comment_id}/reply/": {
+            "post": {
+                "operationId": "reply_to_comment",
+                "summary": "reply to comment of given comment_id",
+                "description": "react to comment of given comment_id. This api is not idempotent.",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "comment_id",
+                        "in": "path",
+                        "description": "The comment_id of comment to react",
+                        "required": true,
+                        "type": "integer"
+                        },
+                    {
+                        "name": "reply",
+                        "in": "body",
+                        "description": "The reply to comment for a comment_id",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "type": "string",
+                                }
+                            },
+                            "required": [
+                            "content"
+                            ]
+                        }
+                    },
+                ],
+                "responses": {
+                    "201": {
+                        "description": "sucess response",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reactions/count/": {
+            "get": {
+                "operationId": "total_reactions_count",
+                "summary": "reactions to count of total reactions",
+                "description": "total no of reactions",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucess response",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/post/reaction/more_positive/count/": {
+            "get": {
+                "operationId": "posts with more positive reactions count",
+                "summary": "posts with more positive reactions than negitive reactions count",
+                "description": "posts with more positive reactions than negitive reactions count",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucess response",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "post_ids_list": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reaction_metrices/{post_id}/": {
+            "get": {
+                "operationId": "reaction_metrices of an post",
+                "summary": "reaction metrices of an post with given post id",
+                "description": "reaction metrices of an post with given post id",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "post_id",
+                        "in": "path",
+                        "description": "The post_id to get reaction metrics of an post",
+                        "required": true,
+                        "type": "integer"
+                        }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "sucess response",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reaction": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/{post_id}/": {
+            "get": {
+                "operationId": "reactions to an post",
+                "summary": "reactions to an post with given post id",
+                "description": "reaction to an post with given post id",
+                "security": [
+                    {
+                        "oauth": [
+                            "superuser"
+                        ]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "post_id",
+                        "in": "path",
+                        "description": "The post_id to get reaction metrics of an post",
+                        "required": true,
+                        "type": "integer"
+                        }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/responses/GetPost"
+                    }
+                }
+            }
+        }
+
+    }
+}

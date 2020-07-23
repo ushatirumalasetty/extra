@@ -1,0 +1,2 @@
+curl -H "content-type: application/json" -d  
+'{"username":"ammu","password":"usha"}' http://127.0.0.1:8080/api/slot_booking/user/login/v1
