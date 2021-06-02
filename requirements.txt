@@ -50,7 +50,7 @@ jsonpointer==2.0
 jsonschema==3.0.1
 lazy-object-proxy==1.4.3
 Logentries==0.17
-markdown2==2.3.7
+markdown2==2.4.0
 MarkupSafe==1.1.1
 mock==3.0.5
 modernize==0.7
